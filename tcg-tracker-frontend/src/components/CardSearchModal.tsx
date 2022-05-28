@@ -8,10 +8,12 @@ import { Button, Input, TextField } from '@mui/material';
 
 export default function CardSearchModal() {
  
+    //interface IFooBar {     foo?: string;     bar?: string; }  var x: IFooBar = {};  x.foo = "asdf";  // ok x.test = "asdf"; // error, as it should be 
     const [searchParams, setSearchParams] = React.useState({
         cardName : "",
         setName : ""
     })
+    const [ygoSetNames, setYgoSetNames] = React.useState(new Array<string>())
     const [searchResult, setSearchResult] = React.useState("");
     const handleChange = (event : any) : void => {
         const value = event.target.value
@@ -21,8 +23,8 @@ export default function CardSearchModal() {
         })
     }
 //NUMH-DE011
-    const searchForCardId = function() : void {
-        fetch('http://yugiohprices.com/api/set_data/' + searchParams.setName)
+    const searchSetForSetName = function(setName: string) : any {
+        fetch('http://localhost:3001/yugiohprices/set_data/' + encodeURIComponent(setName))
         .then(async response =>{
             const data = await response.json()
             console.log(data)
@@ -31,17 +33,46 @@ export default function CardSearchModal() {
                 console.log(error)
                 return Promise.reject(error);
             }
-            setSearchResult(data)
+            return data
         })
         .catch(error =>{
             console.log("error die zweite " + error);
+            return null;
         })
+        return null as any
     }
 
+    const searchForAllSetNames = function() : Array<string> {
+        fetch('http://localhost:3001/yugiohprices/card_sets')
+        .then(async response => {
+            const data = await response.json()
+            console.log(data)
+            if (!response.ok){
+                const error = "error "+ (data && data.message) || response.statusText
+                console.log(error)
+                return Promise.reject(error);
+            }
+            let returnData : Array<string> = data
+            return returnData
+        })
+        .catch(error => {
+            console.log("error die zweite " + error)
+            return new Array<string>(error);
+        })
+        return new Array<string>()
+    }
     //https://db.ygoprodeck.com/api/v7/cardinfo.php
     const handleSearch = (event : any) : void => {
-        searchForCardId();
+        setSearchResult(searchSetForSetName(searchParams.setName)) ;
     }
+
+    React.useEffect(() => {
+        (async () => {
+            console.log("looking for sets")
+          let res =  searchForAllSetNames();
+          setYgoSetNames(res);          
+        })();
+      }, []);
 
     return (
       <React.Fragment>

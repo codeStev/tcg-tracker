@@ -1,12 +1,12 @@
 const express = require('express');
 const morgan = require("morgan");
 const { createProxyMiddleware } = require('http-proxy-middleware');
-
+var cors = require('cors')
 // Create Express Server
 const app = express();
-
+app.use(cors())
 // Configuration
-const PORT = 3000;
+const PORT = 3001;
 const HOST = "localhost";
 const API_SERVICE_URL = "https://yugiohprices.com/api";
 
